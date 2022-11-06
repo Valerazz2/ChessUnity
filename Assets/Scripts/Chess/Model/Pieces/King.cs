@@ -1,18 +1,15 @@
-using System.Reflection;
-using UnityEngine;
-
-namespace Chess
+namespace Chess.Model.Pieces
 {
-    public class King : Figure
+    public class King : Piece
     {
-        public override FigureType GetFigureType()
+        public override PieceType GetFigureType()
         {
-            return FigureType.King;
+            return PieceType.King;
         }
 
-        public override bool AbleMoveTo(Tile target)
+        public override bool AbleMoveTo(Square target)
         {
-            var dist = Vector2Int.Distance(target.pos, ownTile.pos);
+            var dist = Vector2Int.Distance(target.Pos, OwnSquare.Pos);
             if (dist.X < 2 && dist.Y < 2 && dist != Vector2Int.ZERO)
             {
                 return CheckTile(target, color);
@@ -24,11 +21,11 @@ namespace Chess
             }
             return false;
         }
-        private bool AbleCastling(Tile target)
+        private bool AbleCastling(Square target)
         {
-            Figure rook = FindRookByStep(target);
+            Piece rook = FindRookByStep(target);
             
-            if (!wasMoved && rook != null && rook.GetFigureType() == FigureType.Ladja && !rook.wasMoved)
+            if (!wasMoved && rook != null && rook.GetFigureType() == PieceType.Rook && !rook.wasMoved)
             {
                 return true;
             }
@@ -36,19 +33,19 @@ namespace Chess
             return false;
         }
 
-        private Figure FindRookByStep(Tile target)
+        private Piece FindRookByStep(Square target)
         {
-            Vector2Int step = ownTile.pos.GetStep(target.pos);
-            var pos = ownTile.pos + step;
+            Vector2Int step = OwnSquare.Pos.GetStep(target.Pos);
+            var pos = OwnSquare.Pos + step;
             while (pos.X - 1 <= Desk.deskSizeX && pos.X >= 0)
             {
-                Figure figure = Desk.desk[pos.X, pos.Y].currentFigure; 
-                if (figure != null)
+                Piece piece = Desk.desk[pos.X, pos.Y].Piece; 
+                if (piece != null)
                 {
-                    return figure;
+                    return piece;
                 }
                 
-                FigureColor enemyColor = color == FigureColor.White ? FigureColor.Black : FigureColor.White;
+                ChessColor enemyColor = color == ChessColor.White ? ChessColor.Black : ChessColor.White;
                 foreach (var enemyFigure in Desk.AllFigureColor(enemyColor))
                 {
                     if (enemyFigure.AbleMoveTo(Desk.desk[pos.X, pos.Y]))

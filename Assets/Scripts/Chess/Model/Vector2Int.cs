@@ -1,7 +1,6 @@
 using System;
-using System.Security.Cryptography.X509Certificates;
 
-namespace Chess
+namespace Chess.Model
 {
     public struct Vector2Int
     {

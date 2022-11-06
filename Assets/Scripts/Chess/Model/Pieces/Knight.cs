@@ -1,15 +1,15 @@
-namespace Chess
+namespace Chess.Model.Pieces
 {
-    public class Knight: Figure
+    public class Knight: Piece
     {
-        public override FigureType GetFigureType()
+        public override PieceType GetFigureType()
         {
-            return FigureType.Knight;
+            return PieceType.Knight;
         }
 
-        public override bool AbleMoveTo(Tile target)
+        public override bool AbleMoveTo(Square target)
         {
-            var dist = Vector2Int.Distance(target.pos, ownTile.pos);
+            var dist = Vector2Int.Distance(target.Pos, OwnSquare.Pos);
             if (dist.X == 1 && dist.Y == 2 || dist.X == 2 && dist.Y == 1)
             {
                 return CheckTile(target, color);

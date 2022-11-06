@@ -1,10 +1,10 @@
-namespace Chess
+namespace Chess.Model
 {
     public class MoveInfo
     {
         public MoveType MoveType;
-        public Tile MovedFrom;
-        public Figure Figure;
+        public Square MovedFrom;
+        public Piece Piece;
     }
 
     public enum MoveType

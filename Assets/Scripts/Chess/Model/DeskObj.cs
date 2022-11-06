@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace Chess
+namespace Chess.Model
 {
     public class DeskObj
     {

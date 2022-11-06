@@ -162,14 +162,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 831e587eb4811f5409c9e76d984352a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  peshka: {fileID: 21300000, guid: 962c0c266b3fc24429ad8b89d4750f15, type: 3}
-  slon: {fileID: 21300000, guid: 28f98ac0f698f8d48a832f8a29477259, type: 3}
-  horse: {fileID: 21300000, guid: b8e409c26ea49e943aa1b6d21d216716, type: 3}
-  ladja: {fileID: 21300000, guid: 72fa644c9cdeb7644b74c125c08a40ae, type: 3}
-  ferz: {fileID: 21300000, guid: ad23ab01062f5b94aa764a9d2223e2a9, type: 3}
-  king: {fileID: 21300000, guid: bd6359af827275b4e91d17cafc3a7822, type: 3}
   tile: {fileID: 2567170131027520766, guid: 24f535d76da9dbb4b999fb5d37cde294, type: 3}
-  figureSprie: {fileID: 4985069212179577749, guid: 1b9ce026468fe584e90c8a58232da746, type: 3}
+  figureSprite: {fileID: 4985069212179577749, guid: 1b9ce026468fe584e90c8a58232da746, type: 3}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
