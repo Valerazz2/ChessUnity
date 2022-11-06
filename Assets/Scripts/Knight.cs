@@ -1,10 +1,10 @@
 namespace Chess
 {
-    public class Horse: Figure
+    public class Knight: Figure
     {
         public override FigureType GetFigureType()
         {
-            return FigureType.Horse;
+            return FigureType.Knight;
         }
 
         public override bool AbleMoveTo(Tile target)
@@ -18,7 +18,7 @@ namespace Chess
             return false;
         }
 
-        public Horse(Desk getDesk) : base(getDesk)
+        public Knight(Desk getDesk) : base(getDesk)
         {
         }
     }

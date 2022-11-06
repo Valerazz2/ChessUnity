@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Chess;
 
 public class Peshka : Figure
@@ -26,7 +24,7 @@ public class Peshka : Figure
         if (!wasMoved && Math.Abs(distance.Y) == 2)
         {
             Vector2Int step = ownTile.pos.GetStep(targetTile.pos);
-            if (Desk.desk[ownTile.pos.X + step.X,ownTile.pos.Y + step.Y].currentFigure != null)
+            if (Desk.GetFigureAt(ownTile.pos + step) != null)
             {
                 return false;
             }

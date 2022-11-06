@@ -19,12 +19,12 @@ public class Desk
         var figuresSpots = new Figure[,]
         {
             {new Ladja(this), new Peshka(this), null, null, null, null, new Peshka(this), new Ladja(this)},
-            {new Horse(this), new Peshka(this), null, null, null, null, new Peshka(this), new Horse(this)},
+            {new Knight(this), new Peshka(this), null, null, null, null, new Peshka(this), new Knight(this)},
             {new Slon(this), new Peshka(this), null, null, null, null, new Peshka(this), new Slon(this)},
             {new Ferz(this), new Peshka(this), null, null, null, null, new Peshka(this), new Ferz(this)},
             {new King(this), new Peshka(this), null, null, null, null, new Peshka(this), new King(this)},
             {new Slon(this), new Peshka(this), null, null, null, null, new Peshka(this), new Slon(this)},
-            {new Horse(this), new Peshka(this), null, null, null, null, new Peshka(this), new Horse(this)},
+            {new Knight(this), new Peshka(this), null, null, null, null, new Peshka(this), new Knight(this)},
             {new Ladja(this), new Peshka(this), null, null, null, null, new Peshka(this), new Ladja(this)}
         };
         
@@ -50,7 +50,8 @@ public class Desk
         {
             return;
         }
-        Move = Move == FigureColor.White ? FigureColor.Black : FigureColor.White;
+
+        Move = Move.Invert();
         if (figure.GetFigureType() == FigureType.King && Vector2Int.Distance(figure.ownTile.pos, target.pos) == new Vector2Int(2, 0))
         {
             Vector2Int dir = target.pos - figure.ownTile.pos;

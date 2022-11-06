@@ -1,10 +1,8 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Chess;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Vector2Int = Chess.Vector2Int;
 
 public class ChessView : MonoBehaviour
 {
@@ -78,7 +76,7 @@ public class ChessView : MonoBehaviour
             var tileInst =  Instantiate(tile).GetComponent<SpriteRenderer>();
             Tiles[x, y] = tileInst;
             tileInst.color = Desk.desk[x, y].color == FigureColor.Black? Color.green: Color.white;
-            tileInst.transform.position = new Vector3(Desk.desk[x, y].pos.X, Desk.desk[x, y].pos.Y, 1);
+            tileInst.transform.position = new Vector3(x, y, 1);
 
             if (Desk.desk[x,y].currentFigure != null)
             {

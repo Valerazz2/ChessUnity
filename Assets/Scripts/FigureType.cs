@@ -3,7 +3,7 @@ namespace Chess
     public enum FigureType
     {
         Peshka, 
-        Horse, 
+        Knight, 
         Slon,
         Ladja, 
         Ferz, 
