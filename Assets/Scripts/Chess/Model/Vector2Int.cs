@@ -11,7 +11,7 @@ namespace Chess.Model
             Y = y;
         }
 
-        static public Vector2Int Distance(Vector2Int a, Vector2Int b)
+        public static Vector2Int Distance(Vector2Int a, Vector2Int b)
         {
             return new Vector2Int(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
         }
@@ -21,7 +21,7 @@ namespace Chess.Model
             var dist = target - this;
             if (!dist.IsVertical() && !dist.IsHorizontal() && !dist.IsDiagonal())
             {
-                return ZERO;
+                return Zero;
             }
             dist.X = Math.Sign(dist.X);
             dist.Y = Math.Sign(dist.Y);
@@ -44,7 +44,11 @@ namespace Chess.Model
             return X == 0 && Y != 0;
         }
 
-        public static readonly Vector2Int ZERO = new Vector2Int(0, 0);
+        public static readonly Vector2Int Zero = new Vector2Int(0, 0);
+        public static readonly Vector2Int Right = new Vector2Int(1, 0);
+        public static readonly Vector2Int Left = new Vector2Int(-1, 0);
+        public static readonly Vector2Int Up = new Vector2Int(0, 1);
+        public static readonly Vector2Int Down = new Vector2Int(0, -1);
         
         public bool IsZero()
         {

@@ -8,9 +8,14 @@ namespace Chess.Model
 
     public static class ChessColorExt
     {
-        public static ChessColor Invert(this ChessColor e)
+        public static ChessColor Invert(this ChessColor color)
         {
-            return e == ChessColor.White ? ChessColor.Black : ChessColor.White;
+            return color == ChessColor.White ? ChessColor.Black : ChessColor.White;
+        }
+
+        public static Vector2Int GetNaturalDirection(this ChessColor color)
+        {
+            return color == ChessColor.White ? Vector2Int.Up : Vector2Int.Down;
         }
     }
 }

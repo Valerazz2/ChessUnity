@@ -14,7 +14,7 @@ namespace Chess.View
             Desk.OnMove += OnFigureMoved;
         }
 
-        public void OnFigureMoved(MoveInfo moveInfo)
+        private void OnFigureMoved(MoveInfo moveInfo)
         {
             if (moveInfo.Piece == OwnPiece)
             {
@@ -22,7 +22,7 @@ namespace Chess.View
             }
 
             Vector2Int pos = OwnPiece.OwnSquare.Pos;
-            if (Desk.desk[pos.X, pos.Y].Piece != OwnPiece && !wasDestroyed)
+            if (Desk.GetPieceAt(pos) != OwnPiece && !wasDestroyed)
             {
                 wasDestroyed = true;
                 DestroyImmediate(gameObject);

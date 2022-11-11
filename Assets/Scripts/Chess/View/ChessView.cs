@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Chess.Model;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,7 +12,7 @@ namespace Chess.View
       [SerializeField] private GameObject tile;
       [SerializeField] private GameObject figureSprite;
       private Desk Desk;
-      private SpriteRenderer[,] Tiles = new SpriteRenderer[8, 8];
+      private SpriteRenderer[,] Tiles = new SpriteRenderer[Desk.DeskSizeX, Desk.DeskSizeY];
       private SpriteRenderer choosedTile;
       private Color choosedTileColor;
       private List<SpriteRenderer> ColoredTiles = new List<SpriteRenderer>();
@@ -25,70 +26,74 @@ namespace Chess.View
 
       private void Update()
       {
-         if (Input.GetMouseButtonDown(0))
+         if (!Input.GetMouseButtonDown(0)) return;
+         
+         var figure = GetTileByMousePos().Piece;
+         if (Desk.CurrentPiece == null)
          {
-            var figure = GetTileByMousePos().Piece;
-            if (Desk.CurrentPiece == null)
+            if (figure != null && Desk.Move == figure.Color)
             {
-               if (figure != null && Desk.Move == figure.color)
-               {
-                  Desk.CurrentPiece = figure;
-                  MarkOwnTileYellow(figure);
-               
-                  MarkAllAbleMoveTiles(figure);
-               }
-               return;
-            }
-
-            var target = GetTileByMousePos();
-            if (target != null && !(target.Piece != null && target.Piece.color == Desk.Move))
-            {
-               if (Desk.CurrentPiece.AbleMoveTo(target))
-               {
-                  Desk.MoveTo(Desk.CurrentPiece, target);
-                  ChessColor prevMoveColor = Desk.Move == ChessColor.White ? ChessColor.Black : ChessColor.White;
-                  if (Desk.IsMateFor(Desk.FindKing(Desk.Move)))
-                  { 
-                     Debug.Log(prevMoveColor + " Wins");
-                     StartCoroutine(ReloadSceneIn(3));
-                  }
-               }
-               Desk.CurrentPiece = null;
-               ClearAllColoredTiles();
-               return;
-            }
-        
-            if (figure != null && figure.color == Desk.Move)
-            {
-               ClearAllColoredTiles();
                Desk.CurrentPiece = figure;
                MarkOwnTileYellow(figure);
-            
+               
                MarkAllAbleMoveTiles(figure);
             }
+            return;
+         }
+
+         var target = GetTileByMousePos();
+         if (target != null && !(target.Piece != null && target.Piece.Color == Desk.Move))
+         {
+            if (Desk.CurrentPiece.AbleMoveTo(target))
+            {
+               Desk.MoveTo(Desk.CurrentPiece, target);
+               ChessColor prevMoveColor = Desk.Move.Invert();
+               if (Desk.MateFor(Desk.FindKing(Desk.Move)))
+               { 
+                  Debug.Log(prevMoveColor + " Wins");
+                  StartCoroutine(ReloadSceneIn(3));
+               }
+
+               if (Desk.StaleMateFor(Desk.Move))
+               {
+                  Debug.Log("StaleMate");
+                  StartCoroutine(ReloadSceneIn(3));
+               }
+            }
+            Desk.CurrentPiece = null;
+            ClearAllColoredTiles();
+            return;
+         }
+        
+         if (figure != null && figure.Color == Desk.Move)
+         {
+            ClearAllColoredTiles();
+            Desk.CurrentPiece = figure;
+            MarkOwnTileYellow(figure);
+            MarkAllAbleMoveTiles(figure);
          }
       }
 
       private void CreatePhysicsMap()
       {
-         for (int x = 0; x < 8; x++)
+         for (int x = 0; x < Desk.DeskSizeX; x++)
          {
-            for (int y = 0; y < 8; y++)
+            for (int y = 0; y < Desk.DeskSizeY; y++)
             {
                var tileInst =  Instantiate(tile).GetComponent<SpriteRenderer>();
                Tiles[x, y] = tileInst;
-               tileInst.color = Desk.desk[x, y].Color == ChessColor.Black? Color.green: Color.white;
+               tileInst.color = Desk.Squares[x, y].Color == ChessColor.Black? Color.green: Color.white;
                tileInst.transform.position = new Vector3(x, y, 1);
 
-               if (Desk.desk[x,y].Piece != null)
+               if (Desk.Squares[x,y].Piece != null)
                {
+                  var figure = Desk.Squares[x, y].Piece;
                   var inst = Instantiate(figureSprite).GetComponent<PersonalVisualiser>();
                   inst.transform.position = new Vector3(x, y);
-                  inst.OwnPiece = Desk.desk[x, y].Piece;
+                  inst.OwnPiece = figure;
                   inst.Desk = Desk;
-               
-                  var figure = Desk.desk[x, y].Piece;
-                  Sprite sprite = Resources.Load<Sprite>("pieces/" + figure.GetFigureType() + "_" + figure.color);
+                  
+                  Sprite sprite = Resources.Load<Sprite>("pieces/" + figure.GetPieceType() + "_" + figure.Color);
                   inst.GetComponent<SpriteRenderer>().sprite = sprite;
                }
             }
@@ -102,7 +107,7 @@ namespace Chess.View
          if (hit2D && hit2D.collider.gameObject.CompareTag("Tile"))
          {
             Vector2 pos =hit2D.transform.position;
-            return Desk.desk[(int)pos.x, (int)pos.y];
+            return Desk.Squares[(int)pos.x, (int)pos.y];
          }
          return null;
       }
@@ -110,9 +115,9 @@ namespace Chess.View
       private void MarkAllAbleMoveTiles(Piece piece)
       {
          ColoredTiles = new List<SpriteRenderer>();
-         foreach (var tile in piece.AbleMoveTiles())
+         foreach (var square in piece.AbleMoveTiles())
          {
-            SpriteRenderer tileSprite = Tiles[tile.Pos.X, tile.Pos.Y];
+            SpriteRenderer tileSprite = Tiles[square.Pos.X, square.Pos.Y];
             tileSprite.color = Color.yellow;
             ColoredTiles.Add(tileSprite);
          }
@@ -132,7 +137,7 @@ namespace Chess.View
          foreach (var coloredTile in ColoredTiles)
          {
             Vector3 pos = coloredTile.transform.position;
-            coloredTile.color = Desk.desk[(int) pos.x, (int) pos.y].Color == ChessColor.White ? Color.white : Color.green;
+            coloredTile.color = Desk.Squares[(int) pos.x, (int) pos.y].Color == ChessColor.White ? Color.white : Color.green;
          }
       }
 

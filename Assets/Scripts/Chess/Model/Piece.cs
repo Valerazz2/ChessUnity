@@ -1,40 +1,32 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Chess.Model
 {
     public abstract class Piece : DeskObj
     {
-        public bool wasMoved;
-        public ChessColor color;
+        public bool WasMoved;
+        public ChessColor Color;
         public Square OwnSquare;
 
         protected Piece(Desk getDesk) : base(getDesk) {}
 
         public bool TryMoveSuccess(Square target)
         {
-            Piece piece = null;
-            if (target.Piece != null)
-            {
-                piece = target.Piece;
-            }
-            Square oldSquare = OwnSquare;
+            var targetPiece = target.Piece;
+            var oldSquare = OwnSquare;
         
             MoveToWithOutChecking(target);
 
-            Piece king = Desk.FindKing(color);
-            if (king == null)
-            {
-                throw new Exception("No King in desk");
-            }
-            bool isCheck = IsCheckTo(king);
+            var king = Desk.FindKing(Color);
+            var isCheck = IsCheckTo(king);
         
             MoveToWithOutChecking(oldSquare);
-            if (piece != null)
-            {
-                piece.OwnSquare = target;
-                target.Piece = piece;
-            }
+            
+            target.Piece = targetPiece;
+            
             return !isCheck;
         }
 
@@ -48,7 +40,7 @@ namespace Chess.Model
         {
             if (AbleMoveTo(target) && TryMoveSuccess(target))
             {
-                wasMoved = true;
+                WasMoved = true;
                 OwnSquare.Piece = null;
                 target.Piece = this;
                 OwnSquare = target;   
@@ -56,65 +48,49 @@ namespace Chess.Model
             }
             throw new Exception("Loshara");
         }
-        public abstract PieceType GetFigureType();
+        public abstract PieceType GetPieceType();
         public abstract bool AbleMoveTo(Square target);
 
         private bool IsCheckTo(Piece king)
         {
-            ChessColor oppositeColor = king.color == ChessColor.White ? ChessColor.Black : ChessColor.White;
-            foreach (var figure in Desk.AllFigureColor(oppositeColor))
-            {
-                if (figure.AbleMoveTo(king.OwnSquare))
-                {
-                    return true;
-                }
-            }
-            return false;
+            var oppositeColor = king.Color.Invert();
+            return Desk.FindPieceColor(oppositeColor).Any(figure => figure.AbleMoveTo(king.OwnSquare));
         }
         protected bool CheckTile(Square square, ChessColor chessColor)
         {
-            if (square.Piece == null || square.Piece.color != chessColor)
-            {
-                return true;
-            }
-            return false;
+            return square.Piece == null || square.Piece.Color != chessColor;
         }
 
         public bool AbleMoveAnyWhere()
         {
-            foreach (var tile in Desk.desk)
-            {
-                if (AbleMoveTo(tile) && TryMoveSuccess(tile))
-                {
-                    return true;
-                }
-            }
-            return false;
+            return Desk.Squares.Cast<Square>().Any(square => AbleMoveTo(square) && TryMoveSuccess(square));
         }
 
         public List<Square> AbleMoveTiles()
         {
-            List<Square> tiles = new List<Square>();
-            foreach (var tile in Desk.desk)
+            List<Square> squers = new List<Square>();
+            foreach (var square in Desk.Squares)
             {
-                if (AbleMoveTo(tile) && TryMoveSuccess(tile))
+                if (AbleMoveTo(square) && TryMoveSuccess(square))
                 {
-                    tiles.Add(tile); 
+                    squers.Add(square);
                 }
             }
-            return tiles;
+
+            return squers;
         }
 
-        protected bool CheckTiles(Vector2Int step, Square target)
+        protected bool CheckTiles(Square target)
         {
+            var step = OwnSquare.Pos.GetStep(target.Pos);
             for (var pos = OwnSquare.Pos + step; pos != target.Pos; pos += step)
             {
-                if (Desk.GetFigureAt(pos) != null)
+                if (Desk.GetPieceAt(pos) != null)
                 {
                     return false;
                 }
             }
-            return CheckTile(target, color);
+            return CheckTile(target, Color);
         }
     }
 }

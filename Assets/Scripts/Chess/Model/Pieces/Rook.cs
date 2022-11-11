@@ -1,8 +1,10 @@
+using UnityEngine;
+
 namespace Chess.Model.Pieces
 {
     public class Rook: Piece
     {
-        public override PieceType GetFigureType()
+        public override PieceType GetPieceType()
         {
             return PieceType.Rook;
         }
@@ -10,12 +12,7 @@ namespace Chess.Model.Pieces
         public override bool AbleMoveTo(Square target)
         {
             var step = OwnSquare.Pos.GetStep(target.Pos);
-            if (step.IsZero() || step.IsDiagonal()) 
-            {
-                return false;
-            }
-
-            return CheckTiles(step, target);
+            return CheckTiles(target) && !step.IsZero() && !step.IsDiagonal();
         }
 
         public Rook(Desk getDesk) : base(getDesk) { }

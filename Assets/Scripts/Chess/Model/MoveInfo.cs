@@ -9,7 +9,7 @@ namespace Chess.Model
 
     public enum MoveType
     {
-        FigureMoved,
-        FigureRemoved
+        PieceMoved,
+        PieceRemoved
     }
 }

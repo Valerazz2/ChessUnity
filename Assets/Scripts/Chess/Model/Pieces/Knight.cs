@@ -2,7 +2,7 @@ namespace Chess.Model.Pieces
 {
     public class Knight: Piece
     {
-        public override PieceType GetFigureType()
+        public override PieceType GetPieceType()
         {
             return PieceType.Knight;
         }
@@ -12,7 +12,7 @@ namespace Chess.Model.Pieces
             var dist = Vector2Int.Distance(target.Pos, OwnSquare.Pos);
             if (dist.X == 1 && dist.Y == 2 || dist.X == 2 && dist.Y == 1)
             {
-                return CheckTile(target, color);
+                return CheckTile(target, Color);
             }
 
             return false;
