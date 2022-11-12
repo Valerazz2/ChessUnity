@@ -28,21 +28,19 @@ namespace Chess.View
       {
          if (!Input.GetMouseButtonDown(0)) return;
          
-         var figure = GetTileByMousePos().Piece;
-         if (Desk.CurrentPiece == null)
+         var piece = GetTileByMousePos()?.Piece;
+         if (piece != null && Desk.Move == piece.Color)
          {
-            if (figure != null && Desk.Move == figure.Color)
+            if (choosedTile)
             {
-               Desk.CurrentPiece = figure;
-               MarkOwnTileYellow(figure);
-               
-               MarkAllAbleMoveTiles(figure);
+               ClearAllColoredTiles();
             }
+            ChooseNewPiece(piece);
             return;
          }
 
          var target = GetTileByMousePos();
-         if (target != null && !(target.Piece != null && target.Piece.Color == Desk.Move))
+         if (target != null && !(target.Piece != null && target.Piece.Color == Desk.Move) && Desk.CurrentPiece != null)
          {
             if (Desk.CurrentPiece.AbleMoveTo(target))
             {
@@ -62,18 +60,15 @@ namespace Chess.View
             }
             Desk.CurrentPiece = null;
             ClearAllColoredTiles();
-            return;
-         }
-        
-         if (figure != null && figure.Color == Desk.Move)
-         {
-            ClearAllColoredTiles();
-            Desk.CurrentPiece = figure;
-            MarkOwnTileYellow(figure);
-            MarkAllAbleMoveTiles(figure);
          }
       }
 
+      private void ChooseNewPiece(Piece piece)
+      {
+         Desk.CurrentPiece = piece;
+         MarkOwnTileYellow(piece);
+         MarkAllAbleMoveTiles(piece);
+      }
       private void CreatePhysicsMap()
       {
          for (int x = 0; x < Desk.DeskSizeX; x++)

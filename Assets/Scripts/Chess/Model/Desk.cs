@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Chess.Model.Pieces;
+using UnityEngine;
 
 namespace Chess.Model
 {
@@ -82,7 +83,7 @@ namespace Chess.Model
     
         public bool MateFor(Piece king)
         {
-            return !FindPieceColor(king.Color).Any(figure => figure.AbleMoveAnyWhere());
+            return !FindPieceColor(king.Color).Any(figure => figure.AbleMoveAnyWhere()) && IsCheckTo(king);
         }
 
         public List<Piece> FindPieceColor(ChessColor chessColor)
@@ -116,7 +117,7 @@ namespace Chess.Model
         {
             var step = king.OwnSquare.Pos.GetStep(target.Pos);
             var pos = king.OwnSquare.Pos + step;
-            while (pos.X - 1 <= DeskSizeX && pos.X >= 0)
+            while (pos.X < DeskSizeX && pos.X >= 0)
             {
                 var piece = GetPieceAt(pos); 
                 if (piece != null)
@@ -137,12 +138,18 @@ namespace Chess.Model
 
         public Piece GetPieceAt(Vector2Int pos)
         {
+            Debug.Log(pos.X + " " + pos.Y);
             return Squares[pos.X, pos.Y].Piece;
         }
 
         public bool StaleMateFor(ChessColor color)
         {
             return FindPieceColor(color).All(piece => !piece.AbleMoveAnyWhere());
+        }
+        public bool IsCheckTo(Piece king)
+        {
+            var oppositeColor = king.Color.Invert();
+            return FindPieceColor(oppositeColor).Any(figure => figure.AbleMoveTo(king.OwnSquare));
         }
     }
 }

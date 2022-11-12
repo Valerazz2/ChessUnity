@@ -21,7 +21,7 @@ namespace Chess.Model
             MoveToWithOutChecking(target);
 
             var king = Desk.FindKing(Color);
-            var isCheck = IsCheckTo(king);
+            var isCheck = Desk.IsCheckTo(king);
         
             MoveToWithOutChecking(oldSquare);
             
@@ -50,12 +50,7 @@ namespace Chess.Model
         }
         public abstract PieceType GetPieceType();
         public abstract bool AbleMoveTo(Square target);
-
-        private bool IsCheckTo(Piece king)
-        {
-            var oppositeColor = king.Color.Invert();
-            return Desk.FindPieceColor(oppositeColor).Any(figure => figure.AbleMoveTo(king.OwnSquare));
-        }
+        
         protected bool CheckTile(Square square, ChessColor chessColor)
         {
             return square.Piece == null || square.Piece.Color != chessColor;
@@ -68,16 +63,7 @@ namespace Chess.Model
 
         public List<Square> AbleMoveTiles()
         {
-            List<Square> squers = new List<Square>();
-            foreach (var square in Desk.Squares)
-            {
-                if (AbleMoveTo(square) && TryMoveSuccess(square))
-                {
-                    squers.Add(square);
-                }
-            }
-
-            return squers;
+            return Desk.Squares.Cast<Square>().Where(square => AbleMoveTo(square) && TryMoveSuccess(square)).ToList();
         }
 
         protected bool CheckTiles(Square target)
