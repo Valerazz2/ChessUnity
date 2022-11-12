@@ -9,14 +9,14 @@ namespace Chess.Model
     {
         public bool WasMoved;
         public ChessColor Color;
-        public Square OwnSquare;
+        public Square Square;
 
         protected Piece(Desk getDesk) : base(getDesk) {}
 
         public bool TryMoveSuccess(Square target)
         {
             var targetPiece = target.Piece;
-            var oldSquare = OwnSquare;
+            var oldSquare = Square;
         
             MoveToWithOutChecking(target);
 
@@ -32,18 +32,18 @@ namespace Chess.Model
 
         public void MoveToWithOutChecking(Square target)
         {
-            OwnSquare.Piece = null;
+            Square.Piece = null;
             target.Piece = this;
-            OwnSquare = target;
+            Square = target;
         }
         public void MoveTo(Square target)
         {
             if (AbleMoveTo(target) && TryMoveSuccess(target))
             {
                 WasMoved = true;
-                OwnSquare.Piece = null;
+                Square.Piece = null;
                 target.Piece = this;
-                OwnSquare = target;   
+                Square = target;   
                 return;
             }
             throw new Exception("Loshara");
@@ -68,8 +68,8 @@ namespace Chess.Model
 
         protected bool CheckTiles(Square target)
         {
-            var step = OwnSquare.Pos.GetStep(target.Pos);
-            for (var pos = OwnSquare.Pos + step; pos != target.Pos; pos += step)
+            var step = Square.Pos.GetStep(target.Pos);
+            for (var pos = Square.Pos + step; pos != target.Pos; pos += step)
             {
                 if (Desk.GetPieceAt(pos) != null)
                 {
@@ -77,6 +77,10 @@ namespace Chess.Model
                 }
             }
             return CheckTile(target, Color);
+        }
+        public bool ReachedLastSquare()
+        {
+            return Square.Pos.Y == 0 || Square.Pos.Y == Desk.DeskSizeY - 1;
         }
     }
 }

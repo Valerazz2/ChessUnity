@@ -13,10 +13,10 @@ namespace Chess.Model.Pieces
         {
             return MoveIsForward(target) && target.Piece == null || AbleEat(target);
         }
-
+        
         private bool MoveIsForward(Square targetSquare)
         {
-            var distance = targetSquare.Pos - OwnSquare.Pos;
+            var distance = targetSquare.Pos - Square.Pos;
             if (!WasMoved && Math.Abs(distance.Y) == 2)
             {
                 distance.Y /= 2;
@@ -26,7 +26,7 @@ namespace Chess.Model.Pieces
 
         private bool AbleEat(Square targetSquare)
         {
-            var dist = targetSquare.Pos - OwnSquare.Pos;
+            var dist = targetSquare.Pos - Square.Pos;
            
             return dist.Y == Color.GetNaturalDirection().Y && targetSquare.Piece != null && 
                    Math.Abs(dist.X) == 1 && targetSquare.Piece.Color != Color;

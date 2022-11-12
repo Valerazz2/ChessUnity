@@ -18,10 +18,10 @@ namespace Chess.View
         {
             if (moveInfo.Piece == OwnPiece)
             {
-                transform.position = new Vector3(moveInfo.Piece.OwnSquare.Pos.X, moveInfo.Piece.OwnSquare.Pos.Y);
+                transform.position = new Vector3(moveInfo.Piece.Square.Pos.X, moveInfo.Piece.Square.Pos.Y);
             }
 
-            Vector2Int pos = OwnPiece.OwnSquare.Pos;
+            Vector2Int pos = OwnPiece.Square.Pos;
             if (Desk.GetPieceAt(pos) != OwnPiece && !wasDestroyed)
             {
                 wasDestroyed = true;

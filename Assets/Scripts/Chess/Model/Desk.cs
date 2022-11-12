@@ -9,6 +9,7 @@ namespace Chess.Model
     public class Desk
     {
         public ChessColor Move = ChessColor.White;
+        
         public static readonly int DeskSizeX = 8, DeskSizeY = 8;
     
         public readonly Square[,] Squares = new Square[DeskSizeX, DeskSizeY];
@@ -40,7 +41,7 @@ namespace Chess.Model
                     var tile = Squares[x, y] = new Square(new Vector2Int(x, y), color, fig);
                     if (fig != null)
                     {
-                        fig.OwnSquare = tile;
+                        fig.Square = tile;
                         fig.Color = y <= 2 ? ChessColor.White : ChessColor.Black;
                     }
                 }
@@ -55,16 +56,16 @@ namespace Chess.Model
             }
 
             Move = Move.Invert();
-            if (piece.GetPieceType() == PieceType.King && Vector2Int.Distance(piece.OwnSquare.Pos, target.Pos) == new Vector2Int(2, 0))
+            if (piece.GetPieceType() == PieceType.King && Vector2Int.Distance(piece.Square.Pos, target.Pos) == new Vector2Int(2, 0))
             {
-                var step = piece.OwnSquare.Pos.GetStep(target.Pos);
                 var rook = FindRookByStep(target, piece);
                 MoveRookWhenCastling(rook, piece);
             }
+            
             var eventInfo = new MoveInfo
             {
                 Piece = piece,
-                MovedFrom = piece.OwnSquare,
+                MovedFrom = piece.Square,
                 MoveType = MoveType.PieceMoved
             };
             piece.MoveTo(target);
@@ -88,7 +89,7 @@ namespace Chess.Model
 
         public List<Piece> FindPieceColor(ChessColor chessColor)
         {
-            List<Piece> figures = new List<Piece>();
+            var figures = new List<Piece>();
             foreach (var tile in Squares)
             {
                 var piece = tile.Piece;
@@ -101,12 +102,12 @@ namespace Chess.Model
         }
         private void MoveRookWhenCastling(Piece rook, Piece king)
         {
-            Vector2Int offset = king.OwnSquare.Pos.GetStep(rook.OwnSquare.Pos);
-            Vector2Int rookPos = king.OwnSquare.Pos + offset;
+            var offset = king.Square.Pos.GetStep(rook.Square.Pos);
+            var rookPos = king.Square.Pos + offset;
             MoveInfo moveInfo= new MoveInfo
             {
                 Piece = rook,
-                MovedFrom = rook.OwnSquare,
+                MovedFrom = rook.Square,
                 MoveType = MoveType.PieceMoved
             };
             rook.MoveToWithOutChecking(Squares[rookPos.X, rookPos.Y]);
@@ -115,8 +116,8 @@ namespace Chess.Model
         }
         public Piece FindRookByStep(Square target, Piece king)
         {
-            var step = king.OwnSquare.Pos.GetStep(target.Pos);
-            var pos = king.OwnSquare.Pos + step;
+            var step = king.Square.Pos.GetStep(target.Pos);
+            var pos = king.Square.Pos + step;
             while (pos.X < DeskSizeX && pos.X >= 0)
             {
                 var piece = GetPieceAt(pos); 
@@ -138,7 +139,6 @@ namespace Chess.Model
 
         public Piece GetPieceAt(Vector2Int pos)
         {
-            Debug.Log(pos.X + " " + pos.Y);
             return Squares[pos.X, pos.Y].Piece;
         }
 
@@ -149,7 +149,13 @@ namespace Chess.Model
         public bool IsCheckTo(Piece king)
         {
             var oppositeColor = king.Color.Invert();
-            return FindPieceColor(oppositeColor).Any(figure => figure.AbleMoveTo(king.OwnSquare));
+            return FindPieceColor(oppositeColor).Any(figure => figure.AbleMoveTo(king.Square));
+        }
+
+        public void SetPieceAt(Square square, Piece piece)
+        {
+            square.Piece = piece;
+            piece.Square = square;
         }
     }
 }

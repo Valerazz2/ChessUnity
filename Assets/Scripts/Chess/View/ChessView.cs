@@ -45,6 +45,10 @@ namespace Chess.View
             if (Desk.CurrentPiece.AbleMoveTo(target))
             {
                Desk.MoveTo(Desk.CurrentPiece, target);
+               if (Desk.CurrentPiece.GetPieceType() == PieceType.Pawn && Desk.CurrentPiece.ReachedLastSquare())
+               {
+                  //do
+               }
                ChessColor prevMoveColor = Desk.Move.Invert();
                if (Desk.MateFor(Desk.FindKing(Desk.Move)))
                { 
@@ -120,7 +124,7 @@ namespace Chess.View
 
       private void MarkOwnTileYellow(Piece piece)
       {
-         SpriteRenderer tileSprite = Tiles[piece.OwnSquare.Pos.X, piece.OwnSquare.Pos.Y];
+         SpriteRenderer tileSprite = Tiles[piece.Square.Pos.X, piece.Square.Pos.Y];
          choosedTileColor = tileSprite.color;
          tileSprite.color = Color.yellow;
          choosedTile = tileSprite;

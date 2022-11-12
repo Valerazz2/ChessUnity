@@ -11,7 +11,7 @@ namespace Chess.Model.Pieces
 
         public override bool AbleMoveTo(Square target)
         {
-            var step = OwnSquare.Pos.GetStep(target.Pos);
+            var step = Square.Pos.GetStep(target.Pos);
             return !step.IsZero() && CheckTiles(target);
         }
 
