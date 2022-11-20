@@ -13,8 +13,6 @@ namespace Chess.Model.Pieces
             return !step.IsZero() && step.IsDiagonal() && CheckTiles(target);
         }
 
-        public Bishop(Desk getDesk) : base(getDesk)
-        {
-        }
+        public Bishop(Desk getDesk) : base(getDesk) {}
     }
 }

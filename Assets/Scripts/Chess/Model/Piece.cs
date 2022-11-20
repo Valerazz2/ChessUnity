@@ -40,10 +40,14 @@ namespace Chess.Model
         {
             if (AbleMoveTo(target) && TryMoveSuccess(target))
             {
+                if (target.Piece != null)
+                {
+                    Desk.OnPieceRemoveInvoke(target.Piece);
+                }
                 WasMoved = true;
                 Square.Piece = null;
                 target.Piece = this;
-                Square = target;   
+                Square = target;
                 return;
             }
             throw new Exception("Loshara");
@@ -58,12 +62,12 @@ namespace Chess.Model
 
         public bool AbleMoveAnyWhere()
         {
-            return Desk.Squares.Cast<Square>().Any(square => AbleMoveTo(square) && TryMoveSuccess(square));
+            return Desk.ISquares.Any(square => AbleMoveTo(square) && TryMoveSuccess(square));
         }
 
         public List<Square> AbleMoveTiles()
         {
-            return Desk.Squares.Cast<Square>().Where(square => AbleMoveTo(square) && TryMoveSuccess(square)).ToList();
+            return Desk.ISquares.Where(square => AbleMoveTo(square) && TryMoveSuccess(square)).ToList();
         }
 
         protected bool CheckTiles(Square target)
@@ -80,7 +84,7 @@ namespace Chess.Model
         }
         public bool ReachedLastSquare()
         {
-            return Square.Pos.Y == 0 || Square.Pos.Y == Desk.DeskSizeY - 1;
+            return (Square.Pos.Y == 0 || Square.Pos.Y == Desk.DeskSizeY - 1) && GetPieceType() == PieceType.Pawn ;
         }
     }
 }

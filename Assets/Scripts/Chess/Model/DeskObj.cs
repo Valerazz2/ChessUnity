@@ -2,7 +2,7 @@ namespace Chess.Model
 {
     public class DeskObj
     {
-        protected Desk Desk;
+        public Desk Desk { get;}
 
         protected DeskObj(Desk getDesk)
         {

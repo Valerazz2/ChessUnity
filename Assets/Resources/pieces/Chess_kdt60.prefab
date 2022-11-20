@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 410421506017256203}
   - component: {fileID: 6627397072274053631}
-  - component: {fileID: 2356951710685070900}
+  - component: {fileID: -4879819389723632468}
   m_Layer: 2
   m_Name: Chess_kdt60
   m_TagString: Figure
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2356951710685070900
+--- !u!114 &-4879819389723632468
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -92,6 +92,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4985069212179577749}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c93af0abff6f6d4daddcf6d6d60afa6, type: 3}
+  m_Script: {fileID: 11500000, guid: 97558e22d1ac7a34890a8137e2e6e213, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
