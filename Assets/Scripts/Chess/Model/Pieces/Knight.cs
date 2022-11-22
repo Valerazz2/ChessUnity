@@ -12,7 +12,7 @@ namespace Chess.Model.Pieces
             var dist = Vector2Int.Distance(target.Pos, Square.Pos);
             if (dist.X == 1 && dist.Y == 2 || dist.X == 2 && dist.Y == 1)
             {
-                return CheckTile(target, Color);
+                return CheckTile(target, Color) && TryMoveSuccess(target);
             }
 
             return false;
@@ -20,6 +20,7 @@ namespace Chess.Model.Pieces
 
         public Knight(Desk getDesk) : base(getDesk)
         {
+            price = 3;
         }
     }
 }

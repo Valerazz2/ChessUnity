@@ -10,9 +10,12 @@ namespace Chess.Model.Pieces
         public override bool AbleMoveTo(Square target)
         {
             var step = Square.Pos.GetStep(target.Pos);
-            return !step.IsZero() && step.IsDiagonal() && CheckTiles(target);
+            return !step.IsZero() && step.IsDiagonal() && CheckTiles(target) && TryMoveSuccess(target);
         }
 
-        public Bishop(Desk getDesk) : base(getDesk) {}
+        public Bishop(Desk getDesk) : base(getDesk)
+        {
+            price = 3;
+        }
     }
 }

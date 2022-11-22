@@ -1,4 +1,3 @@
-using System;
 using Chess.Model;
 using UnityEngine;
 
@@ -31,7 +30,7 @@ namespace Chess.View
         {
             if (moveInfo.Piece == model)
             {
-                transform.position = model.Square.GetPosVector3();
+                LeanTween.move(gameObject, model.Square.GetPosVector3(), 0.2f).setEase(LeanTweenType.easeOutCirc);
             }
         }
     }

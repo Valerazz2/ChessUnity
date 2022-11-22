@@ -11,7 +11,7 @@ namespace Chess.Model.Pieces
 
         public override bool AbleMoveTo(Square target)
         {
-            return MoveIsForward(target) && target.Piece == null || AbleEat(target);
+            return MoveIsForward(target) && TryMoveSuccess(target) || AbleEat(target) && TryMoveSuccess(target);
         }
         
         private bool MoveIsForward(Square targetSquare)
@@ -21,7 +21,7 @@ namespace Chess.Model.Pieces
             {
                 distance.Y /= 2;
             }
-            return Color.GetNaturalDirection() == distance && CheckTiles(targetSquare);
+            return Color.GetNaturalDirection() == distance && CheckTiles(targetSquare) && targetSquare.Piece == null;
         }
 
         private bool AbleEat(Square targetSquare)
@@ -32,6 +32,9 @@ namespace Chess.Model.Pieces
                    Math.Abs(dist.X) == 1 && targetSquare.Piece.Color != Color;
         }
 
-        public Pawn(Desk getDesk) : base(getDesk) { }
+        public Pawn(Desk getDesk) : base(getDesk)
+        {
+            price = 1;
+        }
     }
 }

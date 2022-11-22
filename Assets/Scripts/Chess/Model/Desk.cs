@@ -9,14 +9,15 @@ namespace Chess.Model
 {
     public class Desk
     {
-        public ChessColor Move = ChessColor.White;
-
+        
         public static readonly int DeskSizeX = 8, DeskSizeY = 8;
+        public IEnumerable<Square> ISquares => Squares.Cast<Square>(); 
+        
+        private ChessColor move = ChessColor.White;
 
         private readonly Square[,] Squares = new Square[DeskSizeX, DeskSizeY];
-        public IEnumerable<Square> ISquares => Squares.Cast<Square>();
-
-        public Piece CurrentPiece;
+        
+        private Piece CurrentPiece;
 
         private ChessState ChessState = ChessState.FigureNull;
 
@@ -25,6 +26,8 @@ namespace Chess.Model
         public event Action<Piece> OnPieceAdd;
 
         public event Action<Piece> OnPieceRemove;
+
+        private Player whitePlayer, blackPlayer;
 
         public void CreateMap()
         {
@@ -54,6 +57,9 @@ namespace Chess.Model
                     }
                 }
             }
+
+            whitePlayer = new Player(ChessColor.White, this);
+            blackPlayer = new Player(ChessColor.Black, this);
         }
 
         public IEnumerable<Piece> GetAllPiece()
@@ -63,16 +69,15 @@ namespace Chess.Model
 
         private void MoveTo(Piece piece, Square target)
         {
-            if (!piece.AbleMoveTo(target) || !piece.TryMoveSuccess(target))
+            if (!piece.AbleMoveTo(target))
             {
                 return;
             }
-
-            Move = Move.Invert();
+            move = move.Invert();
             if (piece.GetPieceType() == PieceType.King && 
                 Vector2Int.Distance(piece.Square.Pos, target.Pos) == new Vector2Int(2, 0))
             {
-                var rook = FindRookByStep(target, piece);
+                var rook = FindFirstFigureByStep(target, piece);
                 MoveRookWhenCastling(rook, piece);
             }
 
@@ -94,9 +99,9 @@ namespace Chess.Model
                 SetPieceAt(target, queen);
                 
                 OnPieceAdd?.Invoke(queen);
+                OnPieceRemove?.Invoke(piece);
             }
         }
-        
 
         public Piece FindKing(ChessColor color)
         {
@@ -108,7 +113,7 @@ namespace Chess.Model
             return !FindPieceColor(king.Color).Any(figure => figure.AbleMoveAnyWhere()) && IsCheckTo(king);
         }
 
-        private List<Piece> FindPieceColor(ChessColor chessColor)
+        private IEnumerable<Piece> FindPieceColor(ChessColor chessColor)
         {
             var figures = new List<Piece>();
             foreach (var tile in Squares)
@@ -119,15 +124,33 @@ namespace Chess.Model
                     figures.Add(piece);
                 }
             }
-
             return figures;
         }
+        
+        public Piece FindFirstFigureByStep(Square target, Piece king)
+        {
+            var step = king.Square.Pos.GetStep(target.Pos);
+            var pos = king.Square.Pos + step;
+            while (pos.X < DeskSizeX && pos.X >= 0)
+            {
+                var piece = GetPieceAt(pos);
+                var enemyColor = king.Color.Invert();
+                if (piece != null || FindPieceColor(enemyColor).Any(e => e.AbleMoveTo(Squares[pos.X, pos.Y])))
+                {
+                    return piece;
+                }
+
+                pos += step;
+            }
+            return null;
+        }
+
 
         private void MoveRookWhenCastling(Piece rook, Piece king)
         {
             var offset = king.Square.Pos.GetStep(rook.Square.Pos);
             var rookPos = king.Square.Pos + offset;
-            MoveInfo moveInfo = new MoveInfo
+            var moveInfo = new MoveInfo
             {
                 Piece = rook,
                 MovedFrom = rook.Square,
@@ -135,31 +158,7 @@ namespace Chess.Model
             rook.MoveToWithOutChecking(Squares[rookPos.X, rookPos.Y]);
             OnMove?.Invoke(moveInfo);
         }
-
-        public Piece FindRookByStep(Square target, Piece king)
-        {
-            var step = king.Square.Pos.GetStep(target.Pos);
-            var pos = king.Square.Pos + step;
-            while (pos.X < DeskSizeX && pos.X >= 0)
-            {
-                var piece = GetPieceAt(pos);
-                if (piece != null)
-                {
-                    return piece;
-                }
-
-                var enemyColor = king.Color.Invert();
-                if (FindPieceColor(enemyColor).Any(e => e.AbleMoveTo(Squares[pos.X, pos.Y])))
-                {
-                    return null;
-                }
-
-                pos += step;
-            }
-
-            return null;
-        }
-
+        
         public Piece GetPieceAt(Vector2Int pos)
         {
             return Squares[pos.X, pos.Y].Piece;
@@ -187,26 +186,27 @@ namespace Chess.Model
             switch (ChessState)
             {
                 case ChessState.FigureNull:
-                    if (square.IsPieceOfColor(Move))
+                    if (square.IsPieceOfColor(move))
                     {
                         CurrentPiece = square.Piece;
                         SetMoveAbleSquaresFor(CurrentPiece);
                         ChessState = ChessState.FigureChoosed;
                     }
                     break;
-
+                
                 case ChessState.FigureChoosed:
-                    if (square.IsPieceOfColor(Move))
+                    if (square.IsPieceOfColor(move))
                     {
                         CurrentPiece = square.Piece;
                         SetMoveAbleSquaresFor(CurrentPiece);
                     }
-                    else MoveTo(CurrentPiece, square);
-
+                    else if (CurrentPiece.Color == move)
+                    {
+                        MoveTo(CurrentPiece, square);
+                        SetAbleMoveTiles(false);
+                    }
                     break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
+                default: throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -217,6 +217,13 @@ namespace Chess.Model
                 square.MoveAble = piece.AbleMoveTo(square);
             }
             piece.Square.MoveAble = true;
+        }
+        private void SetAbleMoveTiles(bool moveAble)
+        {
+            foreach (var square in Squares)
+            {
+                square.MoveAble = moveAble;
+            }
         }
 
         public void OnPieceRemoveInvoke(Piece obj)
