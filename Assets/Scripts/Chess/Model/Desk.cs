@@ -13,7 +13,7 @@ namespace Chess.Model
         public static readonly int DeskSizeX = 8, DeskSizeY = 8;
         public IEnumerable<Square> ISquares => Squares.Cast<Square>(); 
         
-        private ChessColor move = ChessColor.White;
+        public ChessColor move = ChessColor.White;
 
         private readonly Square[,] Squares = new Square[DeskSizeX, DeskSizeY];
         
@@ -22,11 +22,10 @@ namespace Chess.Model
         private ChessState ChessState = ChessState.FigureNull;
 
         public event Action<MoveInfo> OnMove;
-
         public event Action<Piece> OnPieceAdd;
-
-        public event Action<Piece> OnPieceRemove;
-
+        public event Action<Piece> OnPieceRemove; 
+        public event Action<Piece> OnPieceCaptured;
+        
         private Player whitePlayer, blackPlayer;
 
         public void CreateMap()
@@ -88,6 +87,7 @@ namespace Chess.Model
             };
             piece.MoveTo(target);
             OnMove?.Invoke(eventInfo);
+            
 
             if (piece.GetPieceType() == PieceType.Pawn && piece.ReachedLastSquare())
             {
@@ -105,6 +105,7 @@ namespace Chess.Model
 
         public Piece FindKing(ChessColor color)
         {
+            var king = FindPieceColor(color).FirstOrDefault(figure => figure.GetPieceType() == PieceType.King);
             return FindPieceColor(color).FirstOrDefault(figure => figure.GetPieceType() == PieceType.King);
         }
 
@@ -229,6 +230,11 @@ namespace Chess.Model
         public void OnPieceRemoveInvoke(Piece obj)
         {
             OnPieceRemove?.Invoke(obj);
+        }
+
+        public void OnPieceCapturedInvoke(Piece obj)
+        {
+            OnPieceCaptured?.Invoke(obj);
         }
     }
 }

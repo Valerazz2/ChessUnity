@@ -10,13 +10,12 @@ namespace Chess.Model
         public bool WasMoved;
         public ChessColor Color;
         public Square Square;
-        protected int price;
+        public int price { get; protected set;}
 
         protected Piece(Desk getDesk) : base(getDesk) {}
 
         protected bool TryMoveSuccess(Square target)
         {
-            Debug.Log("yep");
             var targetPiece = target.Piece;
             var oldSquare = Square;
         
@@ -44,6 +43,7 @@ namespace Chess.Model
             {
                 if (target.Piece != null)
                 {
+                    Desk.OnPieceCapturedInvoke(target.Piece);
                     Desk.OnPieceRemoveInvoke(target.Piece);
                 }
                 WasMoved = true;
