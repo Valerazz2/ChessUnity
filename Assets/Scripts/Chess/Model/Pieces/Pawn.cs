@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Chess.Model.Pieces
 {
@@ -11,7 +12,7 @@ namespace Chess.Model.Pieces
 
         public override bool AbleMoveTo(Square target)
         {
-            return MoveIsForward(target) && TryMoveSuccess(target) || AbleEat(target) && TryMoveSuccess(target);
+            return MoveIsForward(target) || AbleEat(target);
         }
         
         private bool MoveIsForward(Square targetSquare)
@@ -27,14 +28,30 @@ namespace Chess.Model.Pieces
         private bool AbleEat(Square targetSquare)
         {
             var dist = targetSquare.Pos - Square.Pos;
-           
-            return dist.Y == Color.GetNaturalDirection().Y && targetSquare.Piece != null && 
-                   Math.Abs(dist.X) == 1 && targetSquare.Piece.Color != Color;
+            if (dist.Y == Color.GetNaturalDirection().Y && targetSquare.Piece != null && 
+                Math.Abs(dist.X) == 1 && targetSquare.Piece.Color != Color)
+            {
+                return true;
+            }
+            
+            return TakeOnThePass(targetSquare);
         }
 
-        public Pawn(Desk getDesk) : base(getDesk)
+        private bool TakeOnThePass(Square target)
         {
-            price = 1;
+            if (Desk.prevMove.Piece != null)
+            {
+                var dist = Desk.prevMove.Piece.Square.Pos - Square.Pos;
+                var deltaY = Desk.prevMove.MovedFrom.Pos.Y - Desk.prevMove.Piece.Square.Pos.Y;
+            
+                return Math.Abs(dist.X) == 1 && Desk.prevMove.Piece.GetPieceType() == PieceType.Pawn &&
+                       Desk.GetPieceAt(Square.Pos + new Vector2Int(dist.X, 0)) == Desk.prevMove.Piece &&
+                       Mathf.Abs(deltaY) == 2 && Desk.GetSquareAt(Square.Pos + new Vector2Int(dist.X, deltaY / 2)) == target
+                       && target.Piece == null;
+            }
+            return false;
         }
+
+        public Pawn(Desk getDesk) : base(getDesk) { }
     }
 }

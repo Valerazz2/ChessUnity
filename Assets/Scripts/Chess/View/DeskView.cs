@@ -19,6 +19,8 @@ public class DeskView : AbstractView<Desk>
         var desk = new Desk();
         desk.CreateMap();
         Bind(desk);
+        ChessEx chessEx = new ChessEx(desk);
+        StartCoroutine(chessEx.a());
     }
 
     protected override void OnBind()
@@ -43,7 +45,7 @@ public class DeskView : AbstractView<Desk>
     private Square GetSquareByMousePos()
     {
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit2D = Physics2D.Raycast(mousePos, transform.forward, 1000);
+        var hit2D = Physics2D.Raycast(mousePos, transform.forward, 1000);
         if (hit2D && hit2D.collider.gameObject.CompareTag("Tile"))
         {
             return hit2D.transform.gameObject.GetComponent<SquareView>().model;
@@ -51,7 +53,7 @@ public class DeskView : AbstractView<Desk>
         return null;
     }
 
-    IEnumerator ReloadSceneIn(int seconds)
+    private IEnumerator ReloadSceneIn(int seconds)
     {
         yield return new WaitForSeconds(seconds);
         SceneManager.LoadScene("SampleScene");

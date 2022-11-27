@@ -5,9 +5,9 @@ namespace Chess.Model
 {
     public class Player
     {
-        private readonly List<Piece> capturedPieces = new List<Piece>();
+        private readonly List<PieceType> capturedPieces = new List<PieceType>();
         private ChessColor color;
-        public int CapturedPiecesPrice => capturedPieces.Sum(pieceType => pieceType.price);
+        public int CapturedPiecesPrice => capturedPieces.Sum(pieceType => pieceType.GetPrice());
 
         public Player(ChessColor chessColor, Desk desk)
         {
@@ -19,7 +19,7 @@ namespace Chess.Model
         {
             if (piece.Color != color)
             {
-                capturedPieces.Add(piece);
+                capturedPieces.Add(piece.GetPieceType());
             }
         }
     }

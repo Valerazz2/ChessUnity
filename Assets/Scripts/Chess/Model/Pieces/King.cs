@@ -12,7 +12,7 @@ namespace Chess.Model.Pieces
             var dist = Vector2Int.Distance(target.Pos, Square.Pos);
             if (dist.X < 2 && dist.Y < 2 && dist != Vector2Int.Zero)
             {
-                return CheckTile(target, Color) && TryMoveSuccess(target);
+                return CheckTile(target, Color);
             }
 
             return dist == new Vector2Int(2, 0) && AbleCastling(target);
@@ -24,9 +24,6 @@ namespace Chess.Model.Pieces
             return !WasMoved && rook != null && rook.GetPieceType() == PieceType.Rook && !rook.WasMoved;
         }
 
-        public King(Desk getDesk) : base(getDesk)
-        {
-            price = 1000;
-        }
+        public King(Desk getDesk) : base(getDesk) {}
     }
 }

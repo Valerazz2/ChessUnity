@@ -10,32 +10,53 @@ public class SquareView : AbstractView<Square>
 
     [SerializeField] private GameObject choosedSquare;
     [SerializeField] private GameObject choosedPiece;
+    
     private GameObject createdSprite;
 
     protected override void OnBind()
     {
-        model.MoveAbleChanged += ChangeColor;
+        model.MoveAbleChanged += ViewMovable;
+        model.MarkedChanged += ViewMarked;
+        
         var sprite = model.Color == ChessColor.White ? whiteSquare : blackSquare;
         SpriteRenderer.sprite = sprite;
         transform.position = model.GetPosVector3();
     }
 
-    private void ChangeColor()
+    private void ViewMovable()
     {
-        if (createdSprite)
-            Destroy(createdSprite);
-        
-        
-        if (model.Piece != null && model.Piece.Color == model.Desk.move && model.MoveAble)
-        {
-            createdSprite = Instantiate(choosedPiece);
-            createdSprite.transform.position = model.GetPosVector3();
-            return;
-        }
+        RemoveCreatedSprite();
 
-        if (!model.MoveAble) return;
-        createdSprite = Instantiate(choosedSquare);
-        createdSprite.transform.position = model.GetPosVector3();
+        if (model.MoveAble)
+        {
+            choosedSquare.SetActive(true);
+            createdSprite = choosedSquare;
+            var dist = Vector2.Distance(transform.position, model.Desk.CurrentPiece.Square.GetPosVector3());
+            LeanTween.alpha(createdSprite, 1, dist / 5);
+        }
     }
 
+    private void ViewMarked()
+    {
+        RemoveCreatedSprite();
+        if (model.Marked)
+        {
+            choosedPiece.SetActive(true);
+            createdSprite = choosedPiece;
+            if (createdSprite)
+            {
+                createdSprite.LeanAlpha(0.39f, 0.1f);
+            }
+        }
+    }
+
+    private void RemoveCreatedSprite()
+    {
+        if (createdSprite)
+        {
+            createdSprite.LeanAlpha(0f, 0.01f);
+            createdSprite.SetActive(false);
+        }
+    }
+    
 }

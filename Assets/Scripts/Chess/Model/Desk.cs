@@ -17,9 +17,9 @@ namespace Chess.Model
 
         private readonly Square[,] Squares = new Square[DeskSizeX, DeskSizeY];
         
-        private Piece CurrentPiece;
+        public Piece CurrentPiece { get; private  set; }
 
-        private ChessState ChessState = ChessState.FigureNull;
+        private ChessState ChessState = ChessState.PieceNull;
 
         public event Action<MoveInfo> OnMove;
         public event Action<Piece> OnPieceAdd;
@@ -27,6 +27,8 @@ namespace Chess.Model
         public event Action<Piece> OnPieceCaptured;
         
         private Player whitePlayer, blackPlayer;
+
+        public MoveInfo prevMove = new MoveInfo();
 
         public void CreateMap()
         {
@@ -66,20 +68,32 @@ namespace Chess.Model
             return (from Square square in Squares where square.Piece != null select square.Piece).ToList();
         }
 
-        private void MoveTo(Piece piece, Square target)
+        public void MoveTo(Piece piece, Square target)
         {
-            if (!piece.AbleMoveTo(target))
+            ResetTiles(false);
+            if (!piece.AbleMoveTo(target) || !piece.TryMoveSuccess(target))
             {
                 return;
             }
+            
+            piece.Square.Marked = true;
+            var wantTakeOnThePass = piece.GetPieceType() == PieceType.Pawn &&
+                                    Mathf.Abs(piece.Square.Pos.X - target.Pos.X) == 1 && target.Piece == null;
+
             move = move.Invert();
-            if (piece.GetPieceType() == PieceType.King && 
-                Vector2Int.Distance(piece.Square.Pos, target.Pos) == new Vector2Int(2, 0))
+            
+            if (WantCastling(target, piece))
             {
                 var rook = FindFirstFigureByStep(target, piece);
                 MoveRookWhenCastling(rook, piece);
             }
-
+            
+            if (target.Piece != null)
+            {
+                OnPieceCaptured?.Invoke(target.Piece);
+                OnPieceRemove?.Invoke(target.Piece);
+            }
+            
             var eventInfo = new MoveInfo
             {
                 Piece = piece,
@@ -88,24 +102,50 @@ namespace Chess.Model
             piece.MoveTo(target);
             OnMove?.Invoke(eventInfo);
             
-
+            if (wantTakeOnThePass)
+            {
+                OnTakeOnThePass(eventInfo.MovedFrom, piece);
+            }
+            
             if (piece.GetPieceType() == PieceType.Pawn && piece.ReachedLastSquare())
             {
-                var queen = new Queen(this)
-                {
-                    Color = piece.Color,
-                    Square = piece.Square
-                };
-                SetPieceAt(target, queen);
-                
-                OnPieceAdd?.Invoke(queen);
-                OnPieceRemove?.Invoke(piece);
+                SetQueenAt(target, piece);
             }
+            
+            prevMove.MovedFrom = eventInfo.MovedFrom;
+            prevMove.Piece = piece;
+            piece.Square.Marked = true;
+        }
+
+        private bool WantCastling(Square target, Piece piece)
+        {
+            return piece.GetPieceType() == PieceType.King &&
+                   Vector2Int.Distance(piece.Square.Pos, target.Pos) == new Vector2Int(2, 0);
+        }
+
+        private void OnTakeOnThePass(Square movedFrom, Piece piece)
+        {
+            var deltaY = movedFrom.Pos.Y - piece.Square.Pos.Y;
+            var square = GetSquareAt(piece.Square.Pos + new Vector2Int(0, deltaY));
+            OnPieceCaptured?.Invoke(square.Piece);
+            OnPieceRemove?.Invoke(square.Piece);
+            square.Piece = null;
+        }
+        private void SetQueenAt(Square target, Piece startPiece)
+        {
+            var queen = new Queen(this)
+            {
+                Color = startPiece.Color,
+                Square = startPiece.Square
+            };
+            SetPieceAt(target, queen);
+                
+            OnPieceAdd?.Invoke(queen);
+            OnPieceRemove?.Invoke(startPiece);
         }
 
         public Piece FindKing(ChessColor color)
         {
-            var king = FindPieceColor(color).FirstOrDefault(figure => figure.GetPieceType() == PieceType.King);
             return FindPieceColor(color).FirstOrDefault(figure => figure.GetPieceType() == PieceType.King);
         }
 
@@ -114,7 +154,18 @@ namespace Chess.Model
             return !FindPieceColor(king.Color).Any(figure => figure.AbleMoveAnyWhere()) && IsCheckTo(king);
         }
 
-        private IEnumerable<Piece> FindPieceColor(ChessColor chessColor)
+        public bool StaleMateFor(ChessColor color)
+        {
+            return FindPieceColor(color).All(piece => !piece.AbleMoveAnyWhere());
+        }
+
+        public bool IsCheckTo(Piece king)
+        {
+            var oppositeColor = king.Color.Invert();
+            return FindPieceColor(oppositeColor).Any(figure => figure.AbleMoveTo(king.Square));
+        }
+
+        public IEnumerable<Piece> FindPieceColor(ChessColor chessColor)
         {
             var figures = new List<Piece>();
             foreach (var tile in Squares)
@@ -165,18 +216,11 @@ namespace Chess.Model
             return Squares[pos.X, pos.Y].Piece;
         }
 
-        public bool StaleMateFor(ChessColor color)
-        {
-            return FindPieceColor(color).All(piece => !piece.AbleMoveAnyWhere());
+        public Square GetSquareAt(Vector2Int pos) {
+            return Squares[pos.X, pos.Y];
         }
 
-        public bool IsCheckTo(Piece king)
-        {
-            var oppositeColor = king.Color.Invert();
-            return FindPieceColor(oppositeColor).Any(figure => figure.AbleMoveTo(king.Square));
-        }
-
-        private void SetPieceAt(Square square, Piece piece)
+        public void SetPieceAt(Square square, Piece piece)
         {
             square.Piece = piece;
             piece.Square = square;
@@ -186,16 +230,16 @@ namespace Chess.Model
         {
             switch (ChessState)
             {
-                case ChessState.FigureNull:
+                case ChessState.PieceNull:
                     if (square.IsPieceOfColor(move))
                     {
                         CurrentPiece = square.Piece;
                         SetMoveAbleSquaresFor(CurrentPiece);
-                        ChessState = ChessState.FigureChoosed;
+                        ChessState = ChessState.PieceChoosed;
                     }
                     break;
                 
-                case ChessState.FigureChoosed:
+                case ChessState.PieceChoosed:
                     if (square.IsPieceOfColor(move))
                     {
                         CurrentPiece = square.Piece;
@@ -204,7 +248,10 @@ namespace Chess.Model
                     else if (CurrentPiece.Color == move)
                     {
                         MoveTo(CurrentPiece, square);
-                        SetAbleMoveTiles(false);
+                        if (MateFor(FindKing(move)) || StaleMateFor(move))
+                        {
+                            throw new AggregateException("Mate or StaleMate");
+                        }
                     }
                     break;
                 default: throw new ArgumentOutOfRangeException();
@@ -213,28 +260,27 @@ namespace Chess.Model
 
         private void SetMoveAbleSquaresFor(Piece piece)
         {
+            ResetTiles(false);
             foreach (var square in Squares)
             {
-                square.MoveAble = piece.AbleMoveTo(square);
+                square.MoveAble = piece.AbleMoveTo(square) && piece.TryMoveSuccess(square);
             }
-            piece.Square.MoveAble = true;
+
+            piece.Square.Marked = true;
         }
-        private void SetAbleMoveTiles(bool moveAble)
+        
+        private void ResetTiles(bool moveAble)
         {
             foreach (var square in Squares)
             {
                 square.MoveAble = moveAble;
+                square.Marked = false;
             }
         }
 
-        public void OnPieceRemoveInvoke(Piece obj)
+        private void GetPiecesTypeOf(PieceType pieceType)
         {
-            OnPieceRemove?.Invoke(obj);
-        }
-
-        public void OnPieceCapturedInvoke(Piece obj)
-        {
-            OnPieceCaptured?.Invoke(obj);
+            
         }
     }
 }

@@ -8,6 +8,19 @@ namespace Chess.Model
         public readonly ChessColor Color;
         public Piece Piece;
         private bool _moveAble;
+        private bool _marked;
+        public bool Marked
+        {
+            get => _marked;
+            internal set
+            {
+                if (_marked != value)
+                {
+                    _marked = value;
+                    MarkedChanged?.Invoke();
+                }
+            }
+        }
 
         public bool MoveAble
         {
@@ -22,7 +35,8 @@ namespace Chess.Model
             }
         }
 
-        public event Action MoveAbleChanged; 
+        public event Action MoveAbleChanged;
+        public event Action MarkedChanged;
 
         public Square(Vector2Int pos, ChessColor color, Piece piece, Desk desk) : base(desk)
         {

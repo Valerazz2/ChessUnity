@@ -10,12 +10,13 @@ namespace Chess.Model
         public bool WasMoved;
         public ChessColor Color;
         public Square Square;
-        public int price { get; protected set;}
 
         protected Piece(Desk getDesk) : base(getDesk) {}
 
-        protected bool TryMoveSuccess(Square target)
+        public bool TryMoveSuccess(Square target)
         {
+            //Debug.Log(this + " " + Color + " " + Square.Pos.X + " " + Square.Pos.Y + 
+                      //" to " + target.Pos.X + " " + target.Pos.Y);
             var targetPiece = target.Piece;
             var oldSquare = Square;
         
@@ -39,13 +40,8 @@ namespace Chess.Model
         }
         public void MoveTo(Square target)
         {
-            if (AbleMoveTo(target))
+            if (AbleMoveTo(target) && TryMoveSuccess(target))
             {
-                if (target.Piece != null)
-                {
-                    Desk.OnPieceCapturedInvoke(target.Piece);
-                    Desk.OnPieceRemoveInvoke(target.Piece);
-                }
                 WasMoved = true;
                 Square.Piece = null;
                 target.Piece = this;
@@ -64,7 +60,14 @@ namespace Chess.Model
 
         public bool AbleMoveAnyWhere()
         {
-            return Desk.ISquares.Any(square => AbleMoveTo(square));
+            foreach (var square in Desk.ISquares)
+            {
+                if (AbleMoveTo(square) && TryMoveSuccess(square))
+                {
+                    return true;
+                }
+            }
+            return Desk.ISquares.Any(square => AbleMoveTo(square) && TryMoveSuccess(square));
         }
 
         protected bool CheckTiles(Square target)
