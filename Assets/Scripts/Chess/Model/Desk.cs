@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Chess.Model.Pieces;
-using Chess.View;
 using UnityEngine;
 
 namespace Chess.Model
@@ -248,10 +247,6 @@ namespace Chess.Model
                     else if (CurrentPiece.Color == move)
                     {
                         MoveTo(CurrentPiece, square);
-                        if (MateFor(FindKing(move)) || StaleMateFor(move))
-                        {
-                            throw new AggregateException("Mate or StaleMate");
-                        }
                     }
                     break;
                 default: throw new ArgumentOutOfRangeException();
@@ -276,11 +271,6 @@ namespace Chess.Model
                 square.MoveAble = moveAble;
                 square.Marked = false;
             }
-        }
-
-        private void GetPiecesTypeOf(PieceType pieceType)
-        {
-            
         }
     }
 }

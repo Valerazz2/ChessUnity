@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Chess.Model.Pieces
 {
     public class Queen: Piece

@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace Chess.Model.Pieces
 {
@@ -46,7 +45,7 @@ namespace Chess.Model.Pieces
             
                 return Math.Abs(dist.X) == 1 && Desk.prevMove.Piece.GetPieceType() == PieceType.Pawn &&
                        Desk.GetPieceAt(Square.Pos + new Vector2Int(dist.X, 0)) == Desk.prevMove.Piece &&
-                       Mathf.Abs(deltaY) == 2 && Desk.GetSquareAt(Square.Pos + new Vector2Int(dist.X, deltaY / 2)) == target
+                       Math.Abs(deltaY) == 2 && Desk.GetSquareAt(Square.Pos + new Vector2Int(dist.X, deltaY / 2)) == target
                        && target.Piece == null;
             }
             return false;

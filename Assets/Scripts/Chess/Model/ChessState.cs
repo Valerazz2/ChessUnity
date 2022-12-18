@@ -4,6 +4,5 @@ namespace Chess.Model
     {
         PieceNull,
         PieceChoosed,
-        GameOver
     }
 }

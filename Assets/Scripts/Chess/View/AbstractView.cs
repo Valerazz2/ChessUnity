@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Dynamic;
-using Chess.Model;
 using UnityEngine;
 
 namespace Chess.View
