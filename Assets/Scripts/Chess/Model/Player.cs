@@ -1,11 +1,14 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Random = UnityEngine.Random;
 
 namespace Chess.Model
 {
     public class Player
     {
         private readonly List<PieceType> capturedPieces = new List<PieceType>();
+        
         private ChessColor color;
         public int CapturedPiecesPrice => capturedPieces.Sum(pieceType => pieceType.GetPrice());
 
